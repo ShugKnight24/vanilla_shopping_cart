@@ -230,6 +230,15 @@ function removeFromCart(itemName) {
   updateCartSummary();
 }
 
+function toggleCheckoutSection() {
+  const checkoutSection = document.getElementById("checkout-section");
+  if (cart.length > 0) {
+    checkoutSection.classList.remove("hidden");
+  } else {
+    checkoutSection.classList.add("hidden");
+  }
+}
+
 function updateCartDisplay() {
   const cartList = document.getElementById("cart-list");
   cartList.innerHTML = "";
@@ -267,6 +276,8 @@ function updateCartDisplay() {
   if (cart.length === 0) {
     cartList.innerHTML = "<li>Your cart is empty.</li>";
   }
+
+  toggleCheckoutSection();
 }
 
 function updateCartSummary() {
@@ -291,6 +302,8 @@ function updateCartSummary() {
   subtotalElement.innerText = `Subtotal: $${subtotal.toFixed(2)}`;
   savingsElement.innerText = `Savings: $${savings.toFixed(2)}`;
   totalElement.innerText = `Total: $${total.toFixed(2)}`;
+
+  toggleCheckoutSection();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

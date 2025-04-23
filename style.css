@@ -210,6 +210,82 @@ h2 {
   color: #28a745;
 }
 
+.checkout-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.checkout-button {
+  padding: 12px 25px;
+  font-size: 1.1em;
+  font-weight: bold;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.checkout-button:hover {
+  background-color: #218838;
+}
+
+.payment-options {
+  font-size: 0.9em;
+  color: #6c757d;
+  margin: 0;
+}
+
+.promo-code-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  width: 100%;
+}
+
+.promo-code-section label {
+  font-size: 0.9em;
+  font-weight: bold;
+  white-space: nowrap;
+  margin-bottom: 3px;
+  text-align: left;
+}
+
+.promo-code-section input[type="text"] {
+  flex-grow: 1;
+  padding: 9px;
+  border: 1px solid #ced4da;
+  border-radius: 12px;
+  font-size: 0.9em;
+}
+
+.apply-promo-button {
+  padding: 8px 15px;
+  font-size: 0.9em;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.6s ease;
+}
+
+.apply-promo-button:hover {
+  background-color: #0056b3;
+}
+
+.hidden {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -226,5 +302,9 @@ h2 {
 
   #inventory-list {
     grid-template-columns: 1fr;
+  }
+
+  .checkout-section {
+    align-items: stretch;
   }
 }
