@@ -126,6 +126,8 @@ function incrementQuantity(itemName) {
   updateCartSummary();
 }
 
+// TODO: Refine this function - It doesn't work as expected when decrementing out free items
+// The function should remove the last free item & paid item and adjust the savings correctly
 function decrementQuantity(itemName) {
   const itemIndexToRemove = cart.findLastIndex(
     (cartItem) => cartItem.name === itemName
