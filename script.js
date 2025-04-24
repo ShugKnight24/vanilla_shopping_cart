@@ -219,43 +219,6 @@ function decrementQuantity(itemName) {
   updateCartSummary();
 }
 
-function addToCart(index) {
-  const item = inventory[index];
-
-  if (item.stock <= 0) {
-    alert(`Sorry, ${item.name} is out of stock.`);
-    return;
-  }
-
-  cart.push({ ...item, isFree: false });
-  item.stock--;
-
-  if (item.coupons.includes("B2GO")) {
-    const paidCountInCart = cart.filter(
-      (cartItem) => cartItem.name === item.name && !cartItem.isFree
-    ).length;
-
-    if (paidCountInCart > 0 && paidCountInCart % 2 === 0) {
-      // Check if there's stock for the free item
-      if (item.stock > 0) {
-        console.log(
-          `Adding free ${item.name} due to B2GO offer (paid count: ${paidCountInCart}).`
-        );
-        cart.push({ ...item, isFree: true });
-        item.stock--;
-      } else {
-        console.log(
-          `Qualified for free ${item.name}, but it's now out of stock.`
-        );
-      }
-    }
-  }
-
-  updateInventoryDisplay();
-  updateCartDisplay();
-  updateCartSummary();
-}
-
 function removeFromCart(itemName) {
   const inventoryItem = inventory.find((invItem) => invItem.name === itemName);
   let removedCount = 0;
