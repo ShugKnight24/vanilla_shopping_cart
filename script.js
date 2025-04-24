@@ -24,6 +24,26 @@ const inventory = [
 
 let cart = [];
 
+/**
+ * Calculate the subtotal, savings, and total based on the current cart
+ * @param {Array} currentCart - The current cart array
+ * @returns {Object} of { subtotal, savings, total }
+ */
+function calculateCartTotals(currentCart) {
+  return currentCart.reduce(
+    (totals, item) => {
+      totals.subtotal += item.price;
+      if (item.isFree) {
+        totals.savings += item.price;
+      } else {
+        totals.total += item.price;
+      }
+      return totals;
+    },
+    { subtotal: 0, savings: 0, total: 0 }
+  );
+}
+
 function getCartQuantity(itemName) {
   return cart.filter((item) => item.name === itemName).length;
 }
@@ -316,23 +336,11 @@ function updateCartDisplay() {
 }
 
 function updateCartSummary() {
+  const { subtotal, savings, total } = calculateCartTotals(cart);
+
   const subtotalElement = document.getElementById("subtotal");
   const savingsElement = document.getElementById("savings");
   const totalElement = document.getElementById("total");
-
-  let subtotal = 0;
-  let savings = 0;
-  let total = 0;
-
-  cart.forEach((item) => {
-    subtotal += item.price;
-
-    if (!item.isFree) {
-      total += item.price;
-    } else {
-      savings += item.price;
-    }
-  });
 
   subtotalElement.innerText = `Subtotal: $${subtotal.toFixed(2)}`;
   savingsElement.innerText = `Savings: $${savings.toFixed(2)}`;
