@@ -30,7 +30,3 @@ To run the application, follow these steps:
 - HTML
 - CSS
 - JavaScript
-
-## To Do
-
-- Fix decrement functionality

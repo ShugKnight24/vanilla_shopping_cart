@@ -126,43 +126,69 @@ function incrementQuantity(itemName) {
   updateCartSummary();
 }
 
-// TODO: Refine this function - It doesn't work as expected when decrementing out free items
-// The function should remove the last free item & paid item and adjust the savings correctly
 function decrementQuantity(itemName) {
-  const itemIndexToRemove = cart.findLastIndex(
-    (cartItem) => cartItem.name === itemName
-  );
-
-  if (itemIndexToRemove === -1) return;
-
-  const itemToRemove = cart[itemIndexToRemove];
   const inventoryItem = inventory.find((invItem) => invItem.name === itemName);
-
-  cart.splice(itemIndexToRemove, 1);
-  if (inventoryItem) {
-    inventoryItem.stock++;
+  if (!inventoryItem) {
+    console.error("Inventory item not found for:", itemName);
+    return;
   }
 
-  if (
-    !itemToRemove.isFree &&
-    inventoryItem &&
-    inventoryItem.coupons.includes("B2GO")
-  ) {
-    const paidCount = cart.filter(
-      (ci) => ci.name === itemName && !ci.isFree
-    ).length;
-    const freeCount = cart.filter(
-      (ci) => ci.name === itemName && ci.isFree
-    ).length;
-    const expectedFreeCount = Math.floor(paidCount / 2);
+  const lastItemIndex = cart.findLastIndex(
+    (cartItem) => cartItem.name === itemName
+  );
+  if (lastItemIndex === -1) return;
 
-    if (freeCount > expectedFreeCount) {
-      const freeItemIndex = cart.findIndex(
-        (ci) => ci.name === itemName && ci.isFree
+  const itemToRemove = cart[lastItemIndex];
+
+  if (inventoryItem.coupons.includes("B2GO") && itemToRemove.isFree) {
+    console.log(`Removing free ${itemName} at index ${lastItemIndex}`);
+    cart.splice(lastItemIndex, 1);
+    inventoryItem.stock++;
+
+    const lastPaidItemIndex = cart.findLastIndex(
+      (cartItem) => cartItem.name === itemName && !cartItem.isFree
+    );
+    if (lastPaidItemIndex !== -1) {
+      console.log(
+        `Removing associated paid ${itemName} at index ${lastPaidItemIndex}`
       );
-      if (freeItemIndex !== -1) {
-        console.log(`Removing surplus free ${itemName} due to decrement.`);
-        cart.splice(freeItemIndex, 1);
+      cart.splice(lastPaidItemIndex, 1);
+      inventoryItem.stock++;
+    } else {
+      // Catch all - Should not happen
+      console.error(
+        `Could not find the paid ${itemName} associated with the free one.`
+      );
+    }
+  } else {
+    console.log(`Removing standard ${itemName} at index ${lastItemIndex}`);
+    cart.splice(lastItemIndex, 1);
+    inventoryItem.stock++;
+
+    if (inventoryItem.coupons.includes("B2GO")) {
+      let paidCount = 0;
+      let freeCount = 0;
+      const freeItemIndices = [];
+      cart.forEach((ci, index) => {
+        if (ci.name === itemName) {
+          if (ci.isFree) {
+            freeCount++;
+            freeItemIndices.push(index);
+          } else {
+            paidCount++;
+          }
+        }
+      });
+
+      const expectedFreeCount = Math.floor(paidCount / 2);
+
+      if (freeCount > expectedFreeCount) {
+        freeItemIndices.sort((a, b) => b - a);
+        const excessFreeIndex = freeItemIndices[0];
+        console.log(
+          `Removing excess free ${itemName} at index ${excessFreeIndex} due to paid item removal.`
+        );
+        cart.splice(excessFreeIndex, 1);
         inventoryItem.stock++;
       }
     }
