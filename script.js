@@ -44,6 +44,71 @@ function calculateCartTotals(currentCart) {
   );
 }
 
+/**
+ * Creates the HTML for an inventory product's list item
+ * @param {Object} item - The inventory item
+ * @param {number} quantityInCart - This item's quantity in the cart
+ * @returns {string} The HTML string for the list item
+ */
+function createInventoryItemHTML(item, quantityInCart) {
+  const availableStock = item.stock;
+  const imageElement = `<img src="${item.imageUrl}" alt="${item.name}" class="product-image">`;
+  const detailsElement = `
+    <div class="item-details">
+      <h3>${item.name}</h3>
+      <p>Price: $${item.price.toFixed(2)}</p>
+      <p>Stock: ${availableStock}</p>
+      ${
+        item.coupons.length > 0
+          ? `<p class="coupons">Available coupons: ${item.coupons.join(
+              ", "
+            )}</p>`
+          : ""
+      }
+    </div>
+  `;
+
+  let controlsElement = "";
+  if (quantityInCart === 0) {
+    controlsElement = `
+      <div class="item-controls">
+        ${
+          availableStock > 0
+            ? `
+              <button
+                aria-label="Add item to cart"
+                onclick="incrementQuantity('${item.name}')"
+              >Add to Cart</button>`
+            : "<p>Out of Stock</p>"
+        }
+      </div>
+    `;
+  } else {
+    controlsElement = `
+      <div class="item-controls quantity-controls">
+        <button
+          aria-label="Decrement quantity for item in cart"
+          onclick="decrementQuantity('${item.name}')"
+          ${quantityInCart <= 0 ? "disabled" : ""}
+        >-</button>
+        <span>${quantityInCart}</span>
+        <button
+          aria-label="Increment quantity for item in cart"
+          onclick="incrementQuantity('${item.name}')"
+          ${availableStock <= 0 ? "disabled" : ""}
+        >+</button>
+        <button
+          aria-label="Remove item from cart"
+          class="remove-button"
+          onclick="removeFromCart('${item.name}')"
+        >🗑️</button>
+      </div>
+    `;
+  }
+
+  return imageElement + detailsElement + controlsElement;
+}
+
 function getCartQuantity(itemName) {
   return cart.filter((item) => item.name === itemName).length;
 }
@@ -52,59 +117,12 @@ function updateInventoryDisplay() {
   const inventoryList = document.getElementById("inventory");
   inventoryList.innerHTML = "";
 
-  inventory.forEach((item, index) => {
+  inventory.forEach((item) => {
     const itemElement = document.createElement("li");
     itemElement.className = "inventory-item";
 
     const quantityInCart = getCartQuantity(item.name);
-    const availableStock = item.stock;
-    const imageElement = `<img src="${item.imageUrl}" alt="${item.name}" class="product-image">`;
-    const detailsElement = `
-      <div class="item-details">
-        <h3>${item.name}</h3>
-        <p>Price: $${item.price.toFixed(2)}</p>
-        <p>Stock: ${availableStock}</p>
-        ${
-          item.coupons.length > 0
-            ? `<p class="coupons">Available coupons: ${item.coupons.join(
-                ", "
-              )}</p>`
-            : ""
-        }
-      </div>
-    `;
-
-    let controlsElement = "";
-    if (quantityInCart === 0) {
-      // Show Add to Cart button only if stock > 0
-      controlsElement = `
-        <div class="item-controls">
-            ${
-              availableStock > 0
-                ? `<button aria-label="Add item to cart" onclick="incrementQuantity('${item.name}')">Add to Cart</button>`
-                : "<p>Out of Stock</p>"
-            }
-        </div>
-      `;
-    } else {
-      // Show quantity controls
-      controlsElement = `
-        <div class="item-controls quantity-controls">
-            <button aria-label="Decrement quantity for item in cart" onclick="decrementQuantity('${
-              item.name
-            }')" ${quantityInCart <= 0 ? "disabled" : ""}>-</button>
-            <span>${quantityInCart}</span>
-            <button aria-label="Increment quantity for item in cart" onclick="incrementQuantity('${
-              item.name
-            }')" ${availableStock <= 0 ? "disabled" : ""}>+</button>
-            <button aria-label="Remove item from cart" class="remove-button" onclick="removeFromCart('${
-              item.name
-            }')">🗑️</button>
-        </div>
-      `;
-    }
-
-    itemElement.innerHTML = imageElement + detailsElement + controlsElement;
+    itemElement.innerHTML = createInventoryItemHTML(item, quantityInCart);
     inventoryList.appendChild(itemElement);
   });
 }
