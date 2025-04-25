@@ -25,8 +25,27 @@ const inventory = [
 let cart = [];
 
 /**
+ * Aggregate cart items by name, counting the number of paid and free for each item
+ * @param {Array} currentCart - Current cart array.
+ * @returns {Object} - Key is the item name and the values are { paid, free, price }.
+ */
+function aggregateCartItems(currentCart) {
+  return currentCart.reduce((acc, item) => {
+    if (!acc[item.name]) {
+      acc[item.name] = { paid: 0, free: 0, price: item.price };
+    }
+    if (item.isFree) {
+      acc[item.name].free++;
+    } else {
+      acc[item.name].paid++;
+    }
+    return acc;
+  }, {});
+}
+
+/**
  * Calculate the subtotal, savings, and total based on the current cart
- * @param {Array} currentCart - The current cart array
+ * @param {Array} currentCart - Current cart array
  * @returns {Object} of { subtotal, savings, total }
  */
 function calculateCartTotals(currentCart) {
@@ -45,10 +64,57 @@ function calculateCartTotals(currentCart) {
 }
 
 /**
- * Creates the HTML for an inventory product's list item
+ * Creates the HTML for each line item in the cart
+ * @param {Object} name - Name of the inventory item
+ * @param {Object} count - Paid and free count for each item
+ * @returns {string} - HTML string for the empty cart
+ * */
+
+function createCartLineItemText(name, count) {
+  const totalCount = count.paid + count.free;
+  const lineItemSubtotal = count.paid * count.price;
+  let displayText = `${name} x ${totalCount} (@ $${count.price.toFixed(
+    2
+  )} each)`;
+  if (count.free > 0) {
+    displayText += ` (Paid: ${count.paid}, Free: ${count.free})`;
+  }
+  displayText += ` - Subtotal: $${lineItemSubtotal.toFixed(2)}`;
+  return displayText;
+}
+
+/**
+ * Creates the empty cart HTML
+ * @returns {string} - HTML string for the empty cart
+ * */
+function createEmptyCartHTML() {
+  return `
+  <div class="empty-cart">
+  ${createEmptyCartSVG()}
+  <p>Your cart is empty.</p>
+  </div>
+  `;
+}
+
+/**
+ * Creates the SVG HTML for the empty cart icon
+ * @returns {string} - HTML string for the empty cart SVG icon
+ */
+
+function createEmptyCartSVG() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M0 0h24v24H0z" fill="none"/>
+      <path d="M15.55 13c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM6.16 6h12.15l-2.76 5H8.53L6.16 6zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+    </svg>
+  `;
+}
+
+/**
+ * Creates HTML for inventory item's details
  * @param {Object} item - The inventory item
  * @param {number} quantityInCart - This item's quantity in the cart
- * @returns {string} The HTML string for the list item
+ * @returns {string} - HTML string for an inventory list item
  */
 function createInventoryItemHTML(item, quantityInCart) {
   const availableStock = item.stock;
@@ -272,45 +338,17 @@ function updateCartDisplay() {
   const cartList = document.getElementById("cart-list");
   cartList.innerHTML = "";
 
-  const displayCounts = {};
-
-  cart.forEach((item) => {
-    if (!displayCounts[item.name]) {
-      displayCounts[item.name] = { paid: 0, free: 0, price: item.price };
-    }
-    if (item.isFree) {
-      displayCounts[item.name].free++;
-    } else {
-      displayCounts[item.name].paid++;
-    }
-  });
-
-  for (const name in displayCounts) {
-    const counts = displayCounts[name];
-    const totalCount = counts.paid + counts.free;
-    const lineItemSubtotal = counts.paid * counts.price;
-
-    const cartItemElement = document.createElement("li");
-    let displayText = `${name} x ${totalCount} (@ $${counts.price.toFixed(
-      2
-    )} each)`;
-    if (counts.free > 0) {
-      displayText += ` (Paid: ${counts.paid}, Free: ${counts.free})`;
-    }
-    displayText += ` - Subtotal: $${lineItemSubtotal.toFixed(2)}`;
-    cartItemElement.innerText = displayText;
-    cartList.appendChild(cartItemElement);
-  }
-
   if (cart.length === 0) {
-    cartList.innerHTML = `
-      <div class="empty-cart">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M0 0h24v24H0z" fill="none"/>
-          <path d="M15.55 13c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM6.16 6h12.15l-2.76 5H8.53L6.16 6zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-        </svg>
-        <p>Your cart is empty.</p>
-      </div>`;
+    cartList.innerHTML = createEmptyCartHTML();
+  } else {
+    const displayCount = aggregateCartItems(cart);
+
+    for (const name in displayCount) {
+      const count = displayCount[name];
+      const cartItemElement = document.createElement("li");
+      cartItemElement.innerText = createCartLineItemText(name, count);
+      cartList.appendChild(cartItemElement);
+    }
   }
 
   toggleCheckoutSection();
