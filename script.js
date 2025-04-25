@@ -225,9 +225,7 @@ function incrementQuantity(itemName) {
     }
   }
 
-  updateInventoryDisplay();
-  updateCartDisplay();
-  updateCartSummary();
+  updateAllDisplays();
 }
 
 function decrementQuantity(itemName) {
@@ -298,9 +296,7 @@ function decrementQuantity(itemName) {
     }
   }
 
-  updateInventoryDisplay();
-  updateCartDisplay();
-  updateCartSummary();
+  updateAllDisplays();
 }
 
 function removeFromCart(itemName) {
@@ -320,9 +316,7 @@ function removeFromCart(itemName) {
     inventoryItem.stock += removedCount;
   }
 
-  updateInventoryDisplay();
-  updateCartDisplay();
-  updateCartSummary();
+  updateAllDisplays();
 }
 
 function toggleCheckoutSection() {
@@ -368,8 +362,12 @@ function updateCartSummary() {
   toggleCheckoutSection();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function updateAllDisplays() {
   updateInventoryDisplay();
   updateCartDisplay();
   updateCartSummary();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateAllDisplays();
 });
